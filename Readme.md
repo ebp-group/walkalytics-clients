@@ -22,8 +22,12 @@ world file). The coordinate system for the PNG is `EPSG:3857`.
 ## OpenLayers
 
 This example shows the walking time isochrone on an [OpenLayers][] webmap. To
-use this example get a "Starter key" from <https://dev.walkalytics.com>, run a
-local webserver in its directory with port 8000, for example with Python:
+use this example get a "Starter key" from <https://dev.walkalytics.com> and
+change the following line in `index.html`:
+
+    <body onload="walkalytics.set_apikey('<your-api-key-here>')">
+
+Run a local webserver in its directory with port 8000, for example with Python:
 
     python -m SimpleHTTPServer -p 8000
 
