@@ -1,5 +1,5 @@
 Example code for Walkalytics API
-==============================
+================================
 
 This is a collection of example code for the [Walkalytics][] API, available at
 <https://dev.walkalytics.com>. [Signup now][signup] for a free API key!
@@ -38,17 +38,23 @@ or with [node][]:
     
 If you want to run it on your webserver, contact <mailto:walkalytics@ebp.ch>.
 
+## ArcGIS Javascript API
+
+This example shows the walking isochrone on a webmap with
+[ArcGIS Javascript API][AGJS]. Setting up and test works as with the OpenLayers
+example. 
+
+Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
+and mode walking.
+
 ## ArcGIS Desktop
 
 Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
 
-## ArcGIS Online
-
-Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
-and mode walking.
 
   [Walkalytics]: http://www.walkalytics.com
   [OpenLayers]: http://openlayers.org
   [node]: http://nodejs.org
   [AGOLDriveTime]: https://developers.arcgis.com/en/features/directions/
+  [AGJS]: https://developers.arcgis.com/javascript/
   [signup]: https://dev.walkalytics.com/signup/

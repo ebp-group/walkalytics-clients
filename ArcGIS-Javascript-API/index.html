@@ -1,0 +1,18 @@
+<html>  
+    <head>  
+        <script type="text/javascript" src="http://js.arcgis.com/3.11"></script>  
+        <link rel="stylesheet" href="http://js.arcgis.com/3.11/dijit/themes/claro/claro.css"> 
+        <link rel="stylesheet" href="http://js.arcgis.com/3.11/esri/css/esri.css">
+        <link rel="stylesheet" href="walkalytics.css">
+        <script src="walkalytics.js" type="text/javascript"></script>
+    </head>  
+    <!-- Replace the API key with one of yours. Go to https://dev.walkalytics.com
+         to request your own API key. 
+    
+         The following key is heavily rate-limited and may stop working at any time. -->
+    <body onload="walkalytics.set_apikey('7cd5569036044360a05eb0805e9d72ce')">  
+        <div id="mapDiv" class="map">  
+          <div id="loading" class="loading"></div>
+        </div>
+    </body>    
+</html>  
