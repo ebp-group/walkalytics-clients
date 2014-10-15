@@ -1,8 +1,8 @@
-Demo code for Walkalytics API
+Example code for Walkalytics API
 ==============================
 
-This is a collection of demo code for the [Walkalytics][] API, available at
-<https://dev.walkalytics.com>. Signup now for a free API key!
+This is a collection of example code for the [Walkalytics][] API, available at
+<https://dev.walkalytics.com>. [Signup now][signup] for a free API key!
 
 ## Python
 
@@ -50,3 +50,4 @@ Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime] and
   [OpenLayers]: http://openlayers.org
   [node]: http://nodejs.org
   [AGOLDriveTime]: https://developers.arcgis.com/en/features/directions/
+  [signup]: https://dev.walkalytics.com/signup/
