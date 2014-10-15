@@ -21,7 +21,7 @@ with a world file). The coordinate system for the PNG is `EPSG:3857`.
 
 ## OpenLayers
 
-This example shows the walking time isochrone on an [OpenLayers][] webmap. To
+This example shows the walking isochrone on an [OpenLayers][] webmap. To
 use this example get a "Starter key" from <https://dev.walkalytics.com> and
 change the following line in `index.html`:
 
@@ -44,7 +44,8 @@ Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
 
 ## ArcGIS Online
 
-Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime] and 
+Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
+and mode walking.
 
   [Walkalytics]: http://www.walkalytics.com
   [OpenLayers]: http://openlayers.org
