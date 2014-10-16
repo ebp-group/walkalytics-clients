@@ -21,7 +21,13 @@ except ValueError:
 print("Source location is ({},{}).".format(x,y))
 
 # - set the api_key by reading a netrc file with API key. 
-secrets = netrc.netrc("walkalytics-api-key")
+try:
+    secrets = netrc.netrc("walkalytics-api-key")
+except IOError:
+    print("[Error] Create a file 'walkalytics-api-key' with your API key from https://dev.walkalytics.com.")
+    print("[Error] See 'walkalytics-api-key.sample' for the required netrc-style format.")
+    sys.exit(-1)
+
 _, _, api_key = secrets.authenticators("api.walkalytics.com")
 # - Alternatively, you can replace the two lines above with explicitly set
 #   api_key with your key from https://dev.walkalytics.com/developer
