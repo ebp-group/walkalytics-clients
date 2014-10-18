@@ -130,7 +130,7 @@ walkalytics.calc_isochrone = function(coords) {
     });
 }
 
-// unproject coordinates: meters (EPSG:3857) tolat/lng (WGS84)
+// unproject coordinates: meters (EPSG:3857) to lat/lng (WGS84)
 walkalytics.metersToLatLng = function(x, y) {
   earthradius = 6378137;
   return map.options.crs.projection.unproject(new L.point(x, y).divideBy(earthradius))
