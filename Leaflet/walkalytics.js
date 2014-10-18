@@ -19,7 +19,12 @@ walkalytics.set_apikey = function(apikey) {
 }
 
 // create marker
-walkalytics.marker = new L.marker(map.getCenter());
+walkalytics.marker = new L.marker(
+  map.getCenter(),
+  {
+    opacity: 0.9,
+    clickable: false
+  });
 
 // add an event listener to map
 map.on('click', function(evt) {
