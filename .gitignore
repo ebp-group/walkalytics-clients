@@ -1,3 +1,5 @@
 tmp/
 *.pyc
 walkalytics-api-key
+Test.gdb/
+Test.mxd

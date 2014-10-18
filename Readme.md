@@ -57,6 +57,10 @@ and mode walking.
 
 Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
 
+# Contributors
+
+* Stephan Heuel, [@ping13](https://twitter.com/ping13)
+* Tom Wider, [@tmwdr](https://twitter.com/tmwdr)
 
   [Walkalytics]: http://www.walkalytics.com
   [OpenLayers]: http://openlayers.org
