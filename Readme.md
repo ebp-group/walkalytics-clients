@@ -38,6 +38,12 @@ or with [node][]:
     
 If you want to run it on your webserver, contact <mailto:walkalytics@ebp.ch>.
 
+## Leaflet
+
+This example shows the walking isochrone on a webmap with
+[Leaflet][]. Setting up and test works as with the OpenLayers
+example.
+
 ## ArcGIS Javascript API
 
 This example shows the walking isochrone on a webmap with
@@ -55,6 +61,7 @@ Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
   [Walkalytics]: http://www.walkalytics.com
   [OpenLayers]: http://openlayers.org
   [node]: http://nodejs.org
+  [Leaflet]: http://leafletjs.com/
   [AGOLDriveTime]: https://developers.arcgis.com/en/features/directions/
   [AGJS]: https://developers.arcgis.com/javascript/
   [signup]: https://dev.walkalytics.com/signup/
