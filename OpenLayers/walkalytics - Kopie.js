@@ -59,10 +59,8 @@ walkalytics.click = function(coords) {
 }
 
 walkalytics.calc_isochrone = function(coords) {
-	console.log(coords);
     var x = parseInt(coords[0]);
     var y = parseInt(coords[1]);
-	console.log([x, y]);
     var url = "https://api.walkalytics.com/v1/isochrone?";
 
     inputparams ={ "x": x,
