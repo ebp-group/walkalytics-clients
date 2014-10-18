@@ -55,7 +55,15 @@ and mode walking.
 
 ## ArcGIS Desktop
 
-Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
+The ArcGIS Desktop integration is done by a [Python toolbox][]. In the dialog
+box, you need to specify a point layer and an output path for the raster
+(currently only tested with a File Geodatabase). Additionally, input the
+Walkalytics API key. If a file `walkalytics-api-key` exists (netrc format, see
+above), the key is read from there.
+
+The tool `Isochrone` will read all points in the feature class, calculate the
+walking isochrone for each point and save the resulting raster is in the output
+path.
 
 # Contributors
 
@@ -69,3 +77,4 @@ Todo: Integrate API call as Geoprocessing task in ArcGIS Desktop.
   [AGOLDriveTime]: https://developers.arcgis.com/en/features/directions/
   [AGJS]: https://developers.arcgis.com/javascript/
   [signup]: https://dev.walkalytics.com/signup/
+  [Python toolbox]: http://resources.arcgis.com/en/help/main/10.2/index.html#//001500000022000000
