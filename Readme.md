@@ -65,6 +65,11 @@ The tool `Isochrone` will read all points in the feature class, calculate the
 walking isochrone for each point and save the resulting raster is in the output
 path.
 
+You need to install the [PIL][] module in the path of ArcGIS's Python. Since
+the original library has not been updated, we we recommend the
+[PIL fork `pillow`][pillow]. You can
+[get unofficial Windows binaries here][pillow-binaries].
+
 # Contributors
 
 * Stephan Heuel, [@ping13](https://twitter.com/ping13)
@@ -78,3 +83,6 @@ path.
   [AGJS]: https://developers.arcgis.com/javascript/
   [signup]: https://dev.walkalytics.com/signup/
   [Python toolbox]: http://resources.arcgis.com/en/help/main/10.2/index.html#//001500000022000000
+  [pillow]: https://pillow.readthedocs.org/
+  [PIL]: http://effbot.org/zone/pil-index.htm
+  [pillow-binaries]: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pillow
