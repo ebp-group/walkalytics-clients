@@ -29,7 +29,7 @@ change the following line in `index.html`:
 
 Run a local webserver in its directory with port 8000, for example with Python:
 
-    python -m SimpleHTTPServer -p 8000
+    python -m SimpleHTTPServer 8000
 
 or with [node][]:
 
