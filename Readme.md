@@ -4,6 +4,16 @@ Example code for Walkalytics API
 This is a collection of example code for the [Walkalytics][] API, available at
 <https://dev.walkalytics.com>. [Signup now][signup] for a free API key!
 
+We currently have example code for:
+
+* Python
+* ArcGIS Desktop
+* ArcGIS Javascript API
+* OpenLayers
+* Leaflet
+
+More examples are welcome. Fork this repo and send a pull request.
+
 ## Python
 
 Create a file `walkalytics-api-key` with your API key (see sample for format),
@@ -18,6 +28,32 @@ with a world file). The coordinate system for the PNG is `EPSG:3857`.
        - POI 'Hello!' has a walking time of 0 minutes to the source point.
        - POI 'Is it me you're looking for?' has a walking time of 15 minutes to the source point.
        Save image isochrone_828895_5932832.png with an accompanying world file.
+
+## ArcGIS Desktop
+
+The ArcGIS Desktop integration is done by a [Python toolbox][]. In the dialog
+box, you need to specify a point layer and an output path for the raster
+(currently only tested with a File Geodatabase). Additionally, input the
+Walkalytics API key. If a file `walkalytics-api-key` exists (netrc format, see
+above), the key is read from there.
+
+The tool `Isochrone` will read all points in the feature class, calculate the
+walking isochrone for each point and save the resulting raster is in the output
+path.
+
+You need to install the [PIL][] module in the path of ArcGIS's Python. Since
+the original library has not been updated, we we recommend the
+[PIL fork `pillow`][pillow]. You can
+[get unofficial Windows binaries here][pillow-binaries].
+
+## ArcGIS Javascript API
+
+This example shows the walking isochrone on a webmap with
+[ArcGIS Javascript API][AGJS]. Setting up and test works as with the OpenLayers
+example. 
+
+Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
+and mode walking.
 
 ## OpenLayers
 
@@ -44,31 +80,7 @@ This example shows the walking isochrone on a webmap with
 [Leaflet][]. Setting up and test works as with the OpenLayers
 example.
 
-## ArcGIS Javascript API
 
-This example shows the walking isochrone on a webmap with
-[ArcGIS Javascript API][AGJS]. Setting up and test works as with the OpenLayers
-example. 
-
-Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
-and mode walking.
-
-## ArcGIS Desktop
-
-The ArcGIS Desktop integration is done by a [Python toolbox][]. In the dialog
-box, you need to specify a point layer and an output path for the raster
-(currently only tested with a File Geodatabase). Additionally, input the
-Walkalytics API key. If a file `walkalytics-api-key` exists (netrc format, see
-above), the key is read from there.
-
-The tool `Isochrone` will read all points in the feature class, calculate the
-walking isochrone for each point and save the resulting raster is in the output
-path.
-
-You need to install the [PIL][] module in the path of ArcGIS's Python. Since
-the original library has not been updated, we we recommend the
-[PIL fork `pillow`][pillow]. You can
-[get unofficial Windows binaries here][pillow-binaries].
 
 # Contributors
 
