@@ -1,38 +1,43 @@
-var map;  
-var walkalytics;
+var walkalytics = {};
 
 
 require(["esri/map", "esri/layers/MapImageLayer","esri/layers/MapImage" ,
+         "esri/graphic","esri/symbols/SimpleMarkerSymbol", "esri/Color",
          "dojo/dom", "dojo/domReady!"],   
         
-function(Map,  MapImageLayer ,MapImage,dom ) {   
-    map = new Map("mapDiv", {  
+function(Map,  MapImageLayer ,MapImage, Graphic, SimpleMarkerSymbol, Color, dom ) {   
+    walkalytics.map = new Map("mapDiv", {  
         center: [7.448148,46.947999],  
         zoom: 15,  
         basemap: "streets"  
     });  
 
-    walkalytics = {};
     walkalytics.loading = false;
+
+    // define symbol
+    walkalytics.symbol = new SimpleMarkerSymbol();
+    walkalytics.symbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+    walkalytics.symbol.setColor(new Color([153,0,51,0.75]));
+
 
     var loading = dom.byId("loading");
     
     function showLoading() {
         walkalytics.loading = true;
         esri.show(loading);
-        map.disableMapNavigation();
-        map.hideZoomSlider();
+        walkalytics.map.disableMapNavigation();
+        walkalytics.map.hideZoomSlider();
     }
     
     function hideLoading(error) {
         walkalytics.loading = false;
         esri.hide(loading);
-        map.enableMapNavigation();
-        map.showZoomSlider();
+        walkalytics.map.enableMapNavigation();
+        walkalytics.map.showZoomSlider();
     }
 
-    dojo.connect(map, "onUpdateStart", showLoading);
-    dojo.connect(map, "onUpdateEnd", hideLoading);
+    dojo.connect(walkalytics.map, "onUpdateStart", showLoading);
+    dojo.connect(walkalytics.map, "onUpdateEnd", hideLoading);
 
     
     walkalytics.layer = new MapImageLayer({  
@@ -41,6 +46,8 @@ function(Map,  MapImageLayer ,MapImage,dom ) {
         'hasAttribution': true
     });  
     
+    walkalytics.map.addLayer(walkalytics.layer);  
+
     
     walkalytics.set_apikey = function(apikey) {
         walkalytics.apikey = apikey;
@@ -55,14 +62,16 @@ function(Map,  MapImageLayer ,MapImage,dom ) {
         var y = evt.mapPoint.y;
 
         // set position
-        map.centerAt(evt.mapPoint);
+        walkalytics.map.centerAt(evt.mapPoint);
+
+        // set marker
+        if (walkalytics.graphic) { walkalytics.map.graphics.remove(walkalytics.graphic); }
+        walkalytics.graphic = new Graphic(evt.mapPoint, walkalytics.symbol)
+        walkalytics.map.graphics.add(walkalytics.graphic);
         
-        if (walkalytics.mi) {
-            walkalytics.layer.removeImage(walkalytics.mi);  
-        }
+        if (walkalytics.isochrone_image) {  walkalytics.layer.removeImage(walkalytics.isochrone_image); }
 
-
-        var url = "https://api.walkalytics.com/v1/isochrone?x="+x+"&y="+y+"&outputsize="+512+"&key"+"&subscription-key="+walkalytics.apikey;
+        var url = "https://api.walkalytics.com/v1/isochrone?x="+x+"&y="+y+"&outputsize="+512+"&subscription-key="+walkalytics.apikey;
 
         require(["dojo/request"], function(request){
             request.post(url, {
@@ -79,22 +88,20 @@ function(Map,  MapImageLayer ,MapImage,dom ) {
                     return(false);
                 }
                 
+                // define extent and show isochrone
                 var thisExtent = { 'xmin': data["xllcorner"], 'ymin': data["yllcorner"],
                                    'xmax': data["xllcorner"] + data["ncols"] * data["cellsize"],
                                    'ymax': data["yllcorner"] + data["nrows"] * data["cellsize"],
                                    'spatialReference': { 'wkid': 3857 }
                                  };
 
-                walkalytics.mi = new MapImage({  
+                walkalytics.isochrone_image = new MapImage({  
                     'href' : data['img'],  
                     'extent' : thisExtent
                 });  
                 
-                walkalytics.layer.addImage(walkalytics.mi);  
-                
-                map.addLayer(walkalytics.layer);  
+                walkalytics.layer.addImage(walkalytics.isochrone_image);  
                 hideLoading();
-
 
             },
             function (err) {
@@ -114,7 +121,7 @@ function(Map,  MapImageLayer ,MapImage,dom ) {
 
     }
 
-    map.on("click", walkalytics.renderIsochrone);
+    walkalytics.map.on("click", walkalytics.renderIsochrone);
     
 });  
   
