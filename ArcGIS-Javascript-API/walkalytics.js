@@ -1,16 +1,34 @@
 var walkalytics = {};
 
 
-require(["esri/map", "esri/layers/MapImageLayer","esri/layers/MapImage" ,
+require(["esri/map", "esri/layers/MapImageLayer",
+         "esri/layers/OpenStreetMapLayer","esri/layers/MapImage" ,
          "esri/graphic","esri/symbols/SimpleMarkerSymbol", "esri/Color",
          "dojo/dom", "dojo/domReady!"],   
         
-function(Map,  MapImageLayer ,MapImage, Graphic, SimpleMarkerSymbol, Color, dom ) {   
+function(Map,  MapImageLayer , OpenStreetMapLayer,MapImage, Graphic, SimpleMarkerSymbol, Color, dom ) {   
     walkalytics.map = new Map("mapDiv", {  
         center: [7.448148,46.947999],  
-        zoom: 15,  
-        basemap: "streets"  
+        zoom: 14,  
     });  
+    //OSM layer
+    osmLayer = new esri.layers.OpenStreetMapLayer({
+        id: 'osm',
+        opacity: 1.0,
+        tileServers: ['http://otile1.mqcdn.com/tiles/1.0.0/map',
+                      'http://otile2.mqcdn.com/tiles/1.0.0/map',
+                      'http://otile3.mqcdn.com/tiles/1.0.0/map',
+                      'http://otile4.mqcdn.com/tiles/1.0.0/map']
+    });
+    walkalytics.map.addLayer(osmLayer);
+
+    // isochrone layer
+    walkalytics.isochrone_layer = new MapImageLayer({  
+        'id' : 'isochrone',  
+        'opacity' : 0.9,
+        'hasAttribution': true
+    });  
+    walkalytics.map.addLayer(walkalytics.isochrone_layer);  
 
     walkalytics.loading = false;
 
@@ -40,13 +58,13 @@ function(Map,  MapImageLayer ,MapImage, Graphic, SimpleMarkerSymbol, Color, dom 
     dojo.connect(walkalytics.map, "onUpdateEnd", hideLoading);
 
     
-    walkalytics.layer = new MapImageLayer({  
+    walkalytics.osmlayer = new MapImageLayer({  
         'id' : 'isochrone',  
         'opacity' : 0.9,
         'hasAttribution': true
     });  
     
-    walkalytics.map.addLayer(walkalytics.layer);  
+    walkalytics.map.addLayer(walkalytics.osmlayer);  
 
     
     walkalytics.set_apikey = function(apikey) {
@@ -69,7 +87,7 @@ function(Map,  MapImageLayer ,MapImage, Graphic, SimpleMarkerSymbol, Color, dom 
         walkalytics.graphic = new Graphic(evt.mapPoint, walkalytics.symbol)
         walkalytics.map.graphics.add(walkalytics.graphic);
         
-        if (walkalytics.isochrone_image) {  walkalytics.layer.removeImage(walkalytics.isochrone_image); }
+        if (walkalytics.isochrone_image) {  walkalytics.isochrone_layer.removeImage(walkalytics.isochrone_image); }
 
         var url = "https://api.walkalytics.com/v1/isochrone?x="+x+"&y="+y+"&outputsize="+512+"&subscription-key="+walkalytics.apikey;
 
@@ -100,7 +118,7 @@ function(Map,  MapImageLayer ,MapImage, Graphic, SimpleMarkerSymbol, Color, dom 
                     'extent' : thisExtent
                 });  
                 
-                walkalytics.layer.addImage(walkalytics.isochrone_image);  
+                walkalytics.isochrone_layer.addImage(walkalytics.isochrone_image);  
                 hideLoading();
 
             },
