@@ -63,15 +63,14 @@ pois = { "type": "FeatureCollection",
 # - define API call URL
 url = 'https://api.walkalytics.com/v1/isochrone'
 
+
 def parse_base64(s):
-    # - do a regexp match for extension, code and actual data (this is slightly
-    #   more general than necessary)
-    pattern = re.compile("^data:.+\/(.+);(.+),(.*)$")
-    match = pattern.search(s)
-    # - extract extension, coding and actual data
-    extension = match.group(1)
-    code = match.group(2) 
-    data = match.group(3)
+    semicolon = s.find(";")
+    comma = s.find(",")
+    slash = s.find("/")
+    extension = s[slash+1:semicolon]
+    code = s[semicolon+1:comma]
+    data = s[comma+1:]
     return (extension, code, data)
 
 def call_walkalytics(source,basename="isochrone"):
