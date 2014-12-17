@@ -18,19 +18,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 # Configuration
 
-# - read x and y coordinates from command line arguments, or just use default coords.
-try:
-    sources  = []
-    l = sys.argv[1:]
-    for el in l:
-        sources.append(tuple([int(x) for x in el.split(",")]))
-        assert(len(sources[-1])==2) 
-except AssertionError:
-    print "Error: Arguments should be of the form : x1,y1 (x2,y2) (x3,y3) ..."
-    sys.exit(-1)
-except ValueError:
-    sources  = [ (828895, 5932832) ]
-
 # - set the api_key by reading a netrc file with API key. 
 try:
     secrets = netrc.netrc("walkalytics-api-key")
@@ -40,9 +27,9 @@ except IOError:
     sys.exit(-1)
 
 _, _, api_key = secrets.authenticators("api.walkalytics.com")
+
 # - Alternatively, you can replace the two lines above with explicitly set
 #   api_key with your key from https://dev.walkalytics.com/developer
-
 
 
 # - POIs may also be an empty dict
@@ -157,18 +144,39 @@ def call_walkalytics(source,basename="isochrone"):
     return True
             
 if __name__ == '__main__':
+    # - read x and y coordinates from command line arguments, or just use default coords.
+    try:
+        sources  = []
+        l = sys.argv[1:]
+        for el in l:
+            sources.append(tuple([int(x) for x in el.split(",")]))
+            assert(len(sources[-1])==2) 
+    except AssertionError:
+        print "Error: Arguments should be of the form : x1,y1 (x2,y2) (x3,y3) ..."
+        sys.exit(-1)
+    except ValueError:
+        sources  = [ (828895, 5932832) ]
+
+    # start timer
     t0 = time.clock()
+
+    # calculation
+    
+    # # sequential version
+    # for source in sources:
+    #     call_walkalytics(source)
+
+    # parallel version
     freeze_support() 
     pool = ThreadPool(4)
     pool.map(call_walkalytics, sources)
     pool.close()
     pool.join()
 
+    # stop timer
     t1 = time.clock()
-
-    print("Effective seconds per call: {:.4f}s".format((t1-t0)/len(sources)))
-
-    # isochrone.py 828895,5932832 828895,5932833 828895,5932834 828895,5932835 828895,5932836 828895,5932837 828895,5932838 828895,5932839 828895,5932830 828895,5932831
-    # for source in sources:
-    #     call_walkalytics(source)
+    if len(sources):
+        print("Effective seconds per call: {:.4f}s".format((t1-t0)/len(sources)))
+    else:
+        print "Example call: > isochrone.py 828895,5932832 828895,5932834 828895,5932835"
     
