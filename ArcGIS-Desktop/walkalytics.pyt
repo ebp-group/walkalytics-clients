@@ -173,6 +173,8 @@ class Isochrone(object):
     def execute(self, parameters, messages):
         """ Executing Walkalytics API."""
         inFeatures      = parameters[0].valueAsText
+        api_key = parameters[2].valueAsText
+        messages.addMessage("Calling Walkalytics with API key '{}'".format(api_key))
         # get epsg id for inFeatures
         sr = arcpy.Describe(inFeatures).spatialReference
         epsg_code = sr.factoryCode
@@ -268,6 +270,8 @@ class IsochroneRaw(object):
     def execute(self, parameters, messages):
         """ Executing Walkalytics API."""
         inFeatures      = parameters[0].valueAsText
+        api_key = parameters[2].valueAsText
+        messages.addMessage("Calling Walkalytics with API key '{}'".format(api_key))
         # get epsg id for inFeatures
         sr = arcpy.Describe(inFeatures).spatialReference
         epsg_code = sr.factoryCode
