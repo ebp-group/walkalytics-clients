@@ -53,7 +53,7 @@ def decode_img(s):
     return data.decode(code)
 
 
-def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages):
+def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages, url='https://api.walkalytics.com/v1/isochrone'):
     if raw_data:
         raw_data = 'true'
     else:
@@ -73,7 +73,8 @@ def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages):
     pois = { }
 
     # - define API call URL
-    url = 'https://api.walkalytics.com/v1/isochrone'
+    if url is None:
+        url = 'https://api.walkalytics.com/v1/isochrone'
 
     messages.AddMessage("Calling Walkalytics for ({},{})".format(x,y))
     # Now make the actual API call as a POST request
@@ -92,7 +93,7 @@ def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages):
 
     # Check status
     if result.get("status") != "success":
-        messages.AddMessage("API call did not succeed. Details: {}".format(result.get("msg")))
+        messages.AddMessage("API call did not succeed. Details: {}".format(json.dumps(result)))
         return None
 
     messages.AddMessage("Done calling Walkalytics API")
@@ -108,7 +109,7 @@ class Toolbox(object):
         self.description = "A set of tools to use Walkalytics in ArcGIS Desktop."
 
         # List of tool classes associated with this toolbox
-        self.tools = [Isochrone, IsochroneRaw]
+        self.tools = [Isochrone, IsochroneRaw, CostrasterRaw]
 
 
 class Isochrone(object):
@@ -179,8 +180,9 @@ class Isochrone(object):
         sr = arcpy.Describe(inFeatures).spatialReference
         epsg_code = sr.factoryCode
         arcpy.env.overwriteOutput = True
-        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY"]):
+        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY","OID@"]):
             x, y = row[0]
+            oid = row[1]
             result = call_walkalytics(x,y,epsg_code,False,api_key,messages)
             png_blob = encode_base64(result['img']) # decode_img(...)
             
@@ -198,7 +200,7 @@ class Isochrone(object):
             ## Convert array to a geodatabase raster
             isochrone_raster = arcpy.NumPyArrayToRaster(isochrone_array, lower_left_corner, 
                                                         x_cell_size, y_cell_size, value_to_nodata)
-            imagename = "isochrone_{0}_{1}".format(int(x),int(y))
+            imagename = "isochrone_{}".format(oid)
             messages.addMessage("Save isochrone as {}".format(imagename))
             isochrone_raster.save("{}/{}".format(parameters[1].valueAsText,imagename))
             # Coordinate system is always EPSG3857 (Web Mercator)
@@ -291,7 +293,6 @@ class IsochroneRaw(object):
             lines = blob.split('\n')[0:-1]
             gzf.close()
             
-            
             # convert Esri Ascii grid to numpy
             celltype = int
             nrows     = int(lines[0].split()[1].strip())
@@ -312,6 +313,113 @@ class IsochroneRaw(object):
             # Coordinate system is always EPSG3857 (Web Mercator)
             arcpy.DefineProjection_management(isochrone_raster, self.sr3857)
             isochrone_raster.save("{}/{}".format(parameters[1].valueAsText,imagename))
+        return True
+
+
+class CostrasterRaw(object):
+    def __init__(self):
+        """Define the tool (tool name is the name of the class)."""
+        self.label = "Costraster Raw"
+        self.description = "Returns costraster."
+        self.canRunInBackground = False
+
+        self.sources_fc_name = "source_locations"
+
+
+        self.sr3857 = arcpy.SpatialReference()
+        self.sr3857.factoryCode = 3857
+        self.sr3857.create()
+            
+    def getParameterInfo(self):
+        """Define parameter definitions"""
+        param0 = arcpy.Parameter(
+            displayName="Source Location",
+            name=self.sources_fc_name,
+            datatype="GPFeatureRecordSetLayer",
+            parameterType="Required",
+            direction="Input")
+        param0.value = self.sources_fc_name
+
+        param1 = arcpy.Parameter(
+            displayName="Raster Outputpath",
+            name="out_workspace",
+            datatype="DEWorkspace",
+            parameterType="Required",
+            direction="Input")
+
+        # specify APIkey
+        param2 = arcpy.Parameter(
+            displayName="Walkalytics API key",
+            name="apikey",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+        param2.value=api_key
+        
+        
+        params = [param0, param1, param2]
+        return params
+
+    def isLicensed(self):
+        """Set whether tool is licensed to execute."""
+        return True
+
+    def updateParameters(self, parameters):
+        """Modify the values and properties of parameters before internal
+        validation is performed.  This method is called whenever a parameter
+        has been changed."""
+        return
+
+    def updateMessages(self, parameters):
+        """Modify the messages created by internal validation for each tool
+        parameter.  This method is called after internal validation."""
+        return
+
+    def execute(self, parameters, messages):
+        """ Executing Walkalytics API."""
+        inFeatures      = parameters[0].valueAsText
+        api_key = parameters[2].valueAsText
+        messages.addMessage("Calling Walkalytics with API key '{}'".format(api_key))
+        # get epsg id for inFeatures
+        sr = arcpy.Describe(inFeatures).spatialReference
+        epsg_code = sr.factoryCode
+        arcpy.env.overwriteOutput = True
+
+        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY", "OID@"]):
+            x, y = row[0]
+            oid = row[1]
+            result = call_walkalytics(x,y,epsg_code,True,api_key,messages, url="http://walkalytics.azurewebsites.net/v1/cost")
+            # base64 decoding
+            asc_gz_blob = encode_base64(result['raw_data'])
+
+            # decompress gzip
+            fileobj = StringIO.StringIO(asc_gz_blob)
+            gzf = gzip.GzipFile('dummy-name', 'rb', 9, fileobj)
+            blob = gzf.read()
+            lines = blob.split('\n')[0:-1]
+            gzf.close()
+            
+            
+            # convert Esri Ascii grid to numpy
+            celltype = int
+            nrows     = int(lines[0].split()[1].strip())
+            ncols     = int(lines[1].split()[1].strip())
+            xllcorner = int(lines[2].split()[1].strip())
+            yllcorner = int(lines[3].split()[1].strip())
+            lower_left_corner = arcpy.Point(xllcorner, yllcorner)
+            cellsize  = float(lines[4].split()[1].strip())
+            nodata_value  = celltype(float(lines[5].split()[1].strip()))
+            fileobj = StringIO.StringIO("\n".join(lines[6:]))
+            costraster_array = np.loadtxt(fileobj,dtype=celltype) 
+
+            ## Convert array to a geodatabase raster
+            costraster_raster = arcpy.NumPyArrayToRaster(costraster_array, lower_left_corner, 
+                                                        cellsize, cellsize, nodata_value)
+            imagename = "costraster_raw_{}".format(oid)
+            messages.addMessage("Save costraster as {}".format(imagename))
+            # Coordinate system is always EPSG3857 (Web Mercator)
+            arcpy.DefineProjection_management(costraster_raster, self.sr3857)
+            costraster_raster.save("{}/{}".format(parameters[1].valueAsText,imagename))
         return True
 
 
