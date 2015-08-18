@@ -276,8 +276,10 @@ class IsochroneRaw(object):
         sr = arcpy.Describe(inFeatures).spatialReference
         epsg_code = sr.factoryCode
         arcpy.env.overwriteOutput = True
-        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY"]):
+
+        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY", "OID@"]):
             x, y = row[0]
+            oid = row[1]
             result = call_walkalytics(x,y,epsg_code,True,api_key,messages)
             # base64 decoding
             asc_gz_blob = encode_base64(result['raw_data'])
@@ -305,9 +307,77 @@ class IsochroneRaw(object):
             ## Convert array to a geodatabase raster
             isochrone_raster = arcpy.NumPyArrayToRaster(isochrone_array, lower_left_corner, 
                                                         cellsize, cellsize, nodata_value)
-            imagename = "isochrone_raw_{0}_{1}".format(int(x),int(y))
+            imagename = "isochrone_raw_{}".format(oid)
             messages.addMessage("Save isochrone as {}".format(imagename))
             # Coordinate system is always EPSG3857 (Web Mercator)
             arcpy.DefineProjection_management(isochrone_raster, self.sr3857)
             isochrone_raster.save("{}/{}".format(parameters[1].valueAsText,imagename))
+        return True
+
+
+class PubTrans_CH_Nearby(object):
+    def __init__(self):
+        """Return nearby stations."""
+        self.label = "Nearby Public Transportation"
+        self.description = "."
+        self.canRunInBackground = False
+
+        self.sources_fc_name = "source_locations"
+
+
+        self.sr3857 = arcpy.SpatialReference()
+        self.sr3857.factoryCode = 3857
+        self.sr3857.create()
+            
+    def getParameterInfo(self):
+        """Define parameter definitions"""
+        param0 = arcpy.Parameter(
+            displayName="Source Location",
+            name=self.sources_fc_name,
+            datatype="GPFeatureRecordSetLayer",
+            parameterType="Required",
+            direction="Input")
+        param0.value = self.sources_fc_name
+
+
+        # specify APIkey
+        param1 = arcpy.Parameter(
+            displayName="Walkalytics API key",
+            name="apikey",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+        param1.value=api_key
+        
+        
+        params = [param0, param1]
+        return params
+
+    def isLicensed(self):
+        """Set whether tool is licensed to execute."""
+        return True
+
+    def updateParameters(self, parameters):
+        """Modify the values and properties of parameters before internal
+        validation is performed.  This method is called whenever a parameter
+        has been changed."""
+        return
+
+    def updateMessages(self, parameters):
+        """Modify the messages created by internal validation for each tool
+        parameter.  This method is called after internal validation."""
+        return
+
+    def execute(self, parameters, messages):
+        """ Executing Walkalytics API."""
+        inFeatures      = parameters[0].valueAsText
+        api_key = parameters[2].valueAsText
+        messages.addMessage("Calling Walkalytics with API key '{}'".format(api_key))
+        # get epsg id for inFeatures
+        sr = arcpy.Describe(inFeatures).spatialReference
+        epsg_code = sr.factoryCode
+        arcpy.env.overwriteOutput = True
+        for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY"]):
+            x, y = row[0]
+            #result = call_walkalytics(x,y,epsg_code,False,api_key,messages)
         return True
