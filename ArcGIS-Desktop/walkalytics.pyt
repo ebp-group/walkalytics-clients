@@ -6,6 +6,7 @@ import StringIO
 import netrc 
 import urllib
 import urllib2
+import time
 
 import arcpy
 import numpy as np
@@ -53,7 +54,9 @@ def decode_img(s):
     return data.decode(code)
 
 
-def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages, url='https://api.walkalytics.com/v1/isochrone'):
+def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages,
+                     cost_container=None,
+                     url='https://api.walkalytics.com/v1/isochrone'):
     if raw_data:
         raw_data = 'true'
     else:
@@ -70,6 +73,9 @@ def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages, url='https://api.w
         'key': api_key
     }
 
+    if not cost_container is None and len(cost_container) > 0:
+        params['cost_container'] = cost_container
+
     pois = { }
 
     # - define API call URL
@@ -77,6 +83,7 @@ def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages, url='https://api.w
         url = 'https://api.walkalytics.com/v1/isochrone'
 
     messages.AddMessage("Calling Walkalytics for ({},{})".format(x,y))
+    start = time.clock()
     # Now make the actual API call as a POST request
     try:
         req = urllib2.Request("{0}?{1}".format(url,urllib.urlencode(params)), 
@@ -96,7 +103,8 @@ def call_walkalytics(x,y,epsg_code,raw_data,api_key,messages, url='https://api.w
         messages.AddMessage("API call did not succeed. Details: {}".format(json.dumps(result)))
         return None
 
-    messages.AddMessage("Done calling Walkalytics API")
+    end = time.clock()
+    messages.AddMessage("Done calling Walkalytics API, duration: {:6.3f} seconds".format(end-start))
     return result
 
 
@@ -142,6 +150,7 @@ class Isochrone(object):
             datatype="DEWorkspace",
             parameterType="Required",
             direction="Input")
+        param1.value = arcpy.env.workspace
 
         # specify APIkey
         param2 = arcpy.Parameter(
@@ -151,9 +160,16 @@ class Isochrone(object):
             parameterType="Required",
             direction="Input")
         param2.value=api_key
-        
-        
-        params = [param0, param1, param2]
+
+        param3 = arcpy.Parameter(
+            displayName="Name of the costs that are to be used. Leave empty if in doubt",
+            name="cost_label",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        param3.value = ""
+
+        params = [param0, param1, param2, param3]
         return params
 
     def isLicensed(self):
@@ -180,10 +196,15 @@ class Isochrone(object):
         sr = arcpy.Describe(inFeatures).spatialReference
         epsg_code = sr.factoryCode
         arcpy.env.overwriteOutput = True
+
+        container = parameters[3].valueAsText
+        if not container:
+            container = None
+
         for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY","OID@"]):
             x, y = row[0]
             oid = row[1]
-            result = call_walkalytics(x,y,epsg_code,False,api_key,messages)
+            result = call_walkalytics(x,y,epsg_code,False,api_key,messages, cost_container=container)
             png_blob = encode_base64(result['img']) # decode_img(...)
             
             # convert the PNG blob to an indexed image with values from 0 to 7.
@@ -240,6 +261,7 @@ class IsochroneRaw(object):
             datatype="DEWorkspace",
             parameterType="Required",
             direction="Input")
+        param1.value = arcpy.env.workspace
 
         # specify APIkey
         param2 = arcpy.Parameter(
@@ -250,8 +272,15 @@ class IsochroneRaw(object):
             direction="Input")
         param2.value=api_key
         
+        param3 = arcpy.Parameter(
+            displayName="Name of the costs that are to be used. Leave empty if in doubt",
+            name="cost_label",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        param3.value = ""
         
-        params = [param0, param1, param2]
+        params = [param0, param1, param2, param3]
         return params
 
     def isLicensed(self):
@@ -279,10 +308,14 @@ class IsochroneRaw(object):
         epsg_code = sr.factoryCode
         arcpy.env.overwriteOutput = True
 
+        container = parameters[3].valueAsText
+        if not container:
+            container = None
+            
         for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY", "OID@"]):
             x, y = row[0]
             oid = row[1]
-            result = call_walkalytics(x,y,epsg_code,True,api_key,messages)
+            result = call_walkalytics(x,y,epsg_code,True,api_key,messages,cost_container=container)
             # base64 decoding
             asc_gz_blob = encode_base64(result['raw_data'])
 
@@ -346,6 +379,7 @@ class CostrasterRaw(object):
             datatype="DEWorkspace",
             parameterType="Required",
             direction="Input")
+        param1.value = arcpy.env.workspace
 
         # specify APIkey
         param2 = arcpy.Parameter(
@@ -356,8 +390,15 @@ class CostrasterRaw(object):
             direction="Input")
         param2.value=api_key
         
-        
-        params = [param0, param1, param2]
+        param3 = arcpy.Parameter(
+            displayName="Name of the costs that are to be used. Leave empty if in doubt",
+            name="cost_label",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        param3.value = ""
+
+        params = [param0, param1, param2, param3]
         return params
 
     def isLicensed(self):
@@ -385,10 +426,16 @@ class CostrasterRaw(object):
         epsg_code = sr.factoryCode
         arcpy.env.overwriteOutput = True
 
+        container = parameters[3].valueAsText
+        if not container:
+            container = None
+
         for row in arcpy.da.SearchCursor(inFeatures, ["SHAPE@XY", "OID@"]):
             x, y = row[0]
             oid = row[1]
-            result = call_walkalytics(x,y,epsg_code,True,api_key,messages, url="http://walkalytics.azurewebsites.net/v1/cost")
+            result = call_walkalytics(x,y,epsg_code,True,api_key,messages,
+                                      url="http://walkalytics.azurewebsites.net/v1/cost",
+                                      cost_container = container)
             # base64 decoding
             asc_gz_blob = encode_base64(result['raw_data'])
 
