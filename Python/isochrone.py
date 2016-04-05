@@ -12,9 +12,6 @@ import netrc
 import sys
 import time
 
-from multiprocessing import Pool, freeze_support
-from multiprocessing.dummy import Pool as ThreadPool 
-
 
 # Configuration
 
@@ -32,21 +29,6 @@ _, _, api_key = secrets.authenticators("api.walkalytics.com")
 #   api_key with your key from https://dev.walkalytics.com/developer
 
 
-# - POIs may also be an empty dict
-pois = { "type": "FeatureCollection",
-         "crs": {"type": "EPSG", "properties": {"code": 3857}},
-         "features": [
-             { "type": "Feature",
-               "geometry": {"type": "Point", "coordinates": [828895,5932832]},
-               "properties": {"id": "Hello!"}
-           },
-             { "type": "Feature",
-               "geometry": {"type": "Point", "coordinates": [827894,5934204]},
-               "properties": {"id": "Is it me you're looking for?"}
-           }
-         ]
-     }
-
 # - define API call URL
 url = 'https://api.walkalytics.com/v1/isochrone'
 
@@ -60,22 +42,52 @@ def parse_base64(s):
     data = s[comma+1:]
     return (extension, code, data)
 
-def call_walkalytics(source,basename="isochrone"):
-    x,y =  source
+def call_walkalytics(source, basename="isochrone", user_params = {} , pois = {}):
+    """
 
-    print("Source location is ({},{}).".format(x,y))
+    Takes (x,y) coordinates (default coordinate system is epsg:3857) and calls the Walkalytics API call isochrone. 
 
-    # - set API parameters and set of POIs
+    `user_params` see API docs at https://dev.walkalytics.com/docs/services/54213b7b352a401664d5c48a/operations/54213b7b352a4013e0cb2db1
+    
+    Example call, calculates non-classified isochrone (raw data):
+ 
+    call_walkalytics( (828895,5932832), user_params = { 'raw_data': 'true' } )
+    """
+    
+    # - POIs may also be 
+    # pois = { "type": "FeatureCollection",
+    #          "crs": {"type": "EPSG", "properties": {"code": 3857}},
+    #          "features": [
+    #              { "type": "Feature",
+    #                "geometry": {"type": "Point", "coordinates": [828895,5932832]},
+    #                "properties": {"id": "Hello!"}
+    #              },
+    #              { "type": "Feature",
+    #                "geometry": {"type": "Point", "coordinates": [827894,5934204]},
+    #                "properties": {"id": "Is it me you're looking for?"}
+    #              }
+    #          ]
+    # }
+
+    # set defaults for API params
     params = {
-        'x' : x,
-        'y' : y,
+        # user parameters
         "only_pois": 'false', # or "true"
         "outputsize": 512,    # max is currently 720
+        'raw_data': 'false',  # if true, every pixel contains the actual travel
+                              # time
         # more parameters are possible, see API documentation
-        'key': api_key,
-        'raw_data': 'true'
+        
+        'key': api_key
     }
 
+    # update from user_params
+    params.update(user_params)
+
+    x,y =  source
+    print("Source location is ({},{}).".format(x,y))
+    params.update({ "x": x, "y": y})
+    
     # Now make the actual API call as a POST request
     try:
         req = urllib2.Request("{0}?{1}".format(url,urllib.urlencode(params)), 
@@ -154,29 +166,21 @@ if __name__ == '__main__':
     except AssertionError:
         print "Error: Arguments should be of the form : x1,y1 (x2,y2) (x3,y3) ..."
         sys.exit(-1)
-    except ValueError:
+
+    if len(l) == 0:
         sources  = [ (828895, 5932832) ]
 
     # start timer
-    t0 = time.clock()
+    t0 = time.time()
 
     # calculation
-    
-    # # sequential version
-    # for source in sources:
-    #     call_walkalytics(source)
-
-    # parallel version
-    freeze_support() 
-    pool = ThreadPool(4)
-    pool.map(call_walkalytics, sources)
-    pool.close()
-    pool.join()
+    for source in sources:
+        call_walkalytics(source, user_params = { 'raw_data': 'true' } ) # use 'false' for png
 
     # stop timer
-    t1 = time.clock()
+    t1 = time.time()
     if len(sources):
-        print("Effective seconds per call: {:.4f}s".format((t1-t0)/len(sources)))
+        print("Effective seconds per call: {:.3f}s".format((t1-t0)/len(sources)))
     else:
         print "Example call: > isochrone.py 828895,5932832 828895,5932834 828895,5932835"
     
