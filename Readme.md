@@ -2,7 +2,8 @@ Example code for Walkalytics API
 ================================
 
 This is a collection of example code for the [Walkalytics][] API, available at
-<https://dev.walkalytics.com>. [Signup now][signup] for a free API key!
+<https://dev.walkalytics.com>. 
+[Signup now][signup] for a free API key!
 
 We currently have example code for:
 
@@ -14,12 +15,18 @@ We currently have example code for:
 
 More examples are welcome. Fork this repo and send a pull request.
 
-## Python
+## Setting up an API key file
+Create a file `walkalytics-api-key` in the respective client folder, e.g. in `ArcGIS-Desktop` if you want to use the ArcGIS Toolbox tool. The API key file has the following format (see also the [sample file](https://github.com/ernstbaslerpartner/walkalytics-clients/blob/master/Python/walkalytics-api-key.sample)):
 
-Create a file `walkalytics-api-key` with your API key (see sample for format),
-or put the key directly in the source code. Running the code will print the
-service area, travel time for each POI and an isochrone image as PNG (together
-with a world file). The coordinate system for the PNG is `EPSG:3857`.
+`machine api.walkalytics.com login <your dev.walkalytics.com account, i.e. your registered e-mail address> password <your primary key>`
+
+You can find your primary key under ['Your Profile & Keys'](https://dev.walkalytics.com/developer) on https://dev.walkalytics.com.`
+ 
+## Python
+Use the file `walkalytics-api-key` or put the key directly in the source code. 
+Running the code will print the service area, travel time for each POI and an 
+isochrone image as PNG (together with a world file). The coordinate system for 
+the PNG is `EPSG:3857`.
 
        > python isochrone.py 828895 5932832
 
@@ -31,11 +38,11 @@ with a world file). The coordinate system for the PNG is `EPSG:3857`.
 
 ## ArcGIS Desktop
 
-The ArcGIS Desktop integration is done by a [Python toolbox][]. In the dialog
+The ArcGIS Desktop integration is done by a Python toolbox. In the dialog
 box, you need to specify a point layer and an output path for the raster
 (currently only tested with a File Geodatabase). Additionally, input the
-Walkalytics API key. If a file `walkalytics-api-key` exists (netrc format, see
-above), the key is read from there.
+Walkalytics API key. If a file `walkalytics-api-key` exists in the 
+`ArcGIS-Desktop` folder (netrc format, see above), the key is read from there.
 
 The tool `Isochrone` will read all points in the feature class, calculate the
 walking isochrone for each point and save the resulting raster is in the output
