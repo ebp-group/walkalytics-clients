@@ -13,6 +13,9 @@ We currently have example code for:
 * OpenLayers
 * Leaflet
 
+There is also an [R wrapper](https://github.com/zumbov2/walkalytics) for the
+API available.
+
 More examples are welcome. Fork this repo and send a pull request.
 
 ## Setting up an API key file
