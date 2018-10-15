@@ -53,15 +53,6 @@ the original library has not been updated, we we recommend the
 [PIL fork `pillow`][pillow]. You can
 [get unofficial Windows binaries here][pillow-binaries].
 
-## ArcGIS Javascript API
-
-This example shows the walking isochrone on a webmap with
-[ArcGIS Javascript API][AGJS]. Setting up and test works as with the OpenLayers
-example. 
-
-Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
-and mode walking.
-
 ## OpenLayers
 
 This example shows the walking isochrone on an [OpenLayers][] webmap. To
@@ -79,7 +70,19 @@ or with [node][]:
     npm install http-server -g     # install node module
     http-server -p 8000
     
-If you want to run it on your webserver, contact <mailto:walkalytics@ebp.ch>.
+If you want to run the example on your public webserver,
+contact <mailto:walkalytics@ebp.ch> to allow cross-origin resource sharing
+(CORS) calls for your webserver.
+
+## ArcGIS Javascript API
+
+This example shows the walking isochrone on a webmap with
+[ArcGIS Javascript API 3.x][AGJS]. Setting up and testing works as with the OpenLayers
+example by setting a key and running a local webserver.
+
+Todo: Compare with [Esri's routing based Drive Time Analysis][AGOLDriveTime]
+and mode walking.
+
 
 ## Leaflet
 
