@@ -10,17 +10,8 @@ function(Map,  MapImageLayer , OpenStreetMapLayer,MapImage, Graphic, SimpleMarke
     walkalytics.map = new Map("mapDiv", {  
         center: [7.448148,46.947999],  
         zoom: 14,  
-    });  
-    //OSM layer
-    osmLayer = new esri.layers.OpenStreetMapLayer({
-        id: 'osm',
-        opacity: 1.0,
-        tileServers: ['http://otile1.mqcdn.com/tiles/1.0.0/map',
-                      'http://otile2.mqcdn.com/tiles/1.0.0/map',
-                      'http://otile3.mqcdn.com/tiles/1.0.0/map',
-                      'http://otile4.mqcdn.com/tiles/1.0.0/map']
+        basemap: "topo"
     });
-    walkalytics.map.addLayer(osmLayer);
 
     // isochrone layer
     walkalytics.isochrone_layer = new MapImageLayer({  
