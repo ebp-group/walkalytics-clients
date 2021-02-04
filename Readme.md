@@ -1,6 +1,8 @@
 Example code for Walkalytics API
 ================================
 
+# Update: We decided to shutdown the public API to <https://dev.walkalytics.com>. If you are still interested, contact walkalytics@ebp.ch
+
 This is a collection of example code for the [Walkalytics][] API, available at
 <https://dev.walkalytics.com>. 
 [Signup now][signup] for a free API key!
